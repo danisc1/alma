@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Dashboard ALMA</title>
+</head>
+<body>
+  <h1>Dashboard ALMA</h1>
+  <button id="logoutBtn">Sair</button>
+
+  <div id="perfil"></div>
+
+  <p id="msg"></p>
+
+<script>
+const API_URL = 'http://localhost:3000';
+
+function pegarToken() {
+  return localStorage.getItem('token');
+}
+
+function logout() {
+  localStorage.removeItem('token');
+  window.location.href = 'login.html';
+}
+
+async function carregarPerfil() {
+  const token = pegarToken();
+  if (!token) {
+    window.location.href = 'login.html';
+    return;
+  }
+
+  const res = await fetch(`${API_URL}/perfil`, {
+    headers: { Authorization: 'Bearer ' + token }
+  });
+  if (!res.ok) {
+    localStorage.removeItem('token');
+    window.location.href = 'login.html';
+    return;
+  }
+  const perfil = await res.json();
+  document.getElementById('perfil').textContent = `Olá, ${perfil.nome} (${perfil.tipo_usuario})`;
+
+  if (perfil.tipo_usuario === 'paciente') {
+    window.location.href = 'paciente.html';
+  } else if (perfil.tipo_usuario === 'psicologo') {
+    window.location.href = 'psicologo.html';
+  } else {
+    document.getElementById('msg').textContent = 'Tipo de usuário desconhecido.';
+  }
+}
+
+document.getElementById('logoutBtn').onclick = logout;
+
+window.onload = carregarPerfil;
+</script>
+</body>
+</html>

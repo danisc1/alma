@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Redefinir Senha - ALMA</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="cores.css" />
+</head>
+<body class="bg-[var(--cor-fundo)] min-h-screen flex items-center justify-center p-4">
+
+  <main class="bg-white rounded-lg shadow-lg max-w-md w-full p-8">
+    <h1 class="text-2xl font-semibold mb-6 text-[var(--cor-escura)] text-center">Redefinir Senha</h1>
+
+    <form id="redefinirForm" class="space-y-5">
+      <input
+        type="text"
+        id="token"
+        placeholder="Digite o token recebido"
+        required
+        class="w-full rounded-md border border-[var(--cor-secundaria)] px-4 py-2
+               placeholder-[var(--cor-clara)] focus:outline-none focus:ring-2 focus:ring-[var(--cor-secundaria)]"
+      />
+
+      <input
+        type="password"
+        id="novaSenha"
+        placeholder="Digite a nova senha"
+        required
+        minlength="6"
+        class="w-full rounded-md border border-[var(--cor-secundaria)] px-4 py-2
+               placeholder-[var(--cor-clara)] focus:outline-none focus:ring-2 focus:ring-[var(--cor-secundaria)]"
+      />
+
+      <button
+        type="submit"
+        class="w-full bg-[var(--cor-escura)] text-white font-semibold py-3 rounded-md
+               hover:bg-[var(--cor-secundaria)] transition-colors duration-300"
+      >
+        Redefinir Senha
+      </button>
+    </form>
+
+    <p id="mensagem" class="mt-4 text-center text-sm font-medium"></p>
+
+    <div class="text-center mt-6">
+      <a href="login.html" class="text-[var(--cor-escura)] hover:text-[var(--cor-secundaria)] text-sm font-medium">
+        Voltar para o login
+      </a>
+    </div>
+  </main>
+
+  <script>
+    const API_URL = 'http://localhost:3000';
+
+    document.getElementById('redefinirForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const token = document.getElementById('token').value.trim();
+      const novaSenha = document.getElementById('novaSenha').value.trim();
+      const mensagem = document.getElementById('mensagem');
+
+      try {
+        const res = await fetch(`${API_URL}/redefinir-senha`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ token, novaSenha }),
+        });
+
+        const data = await res.json();
+
+        if (res.ok) {
+          mensagem.textContent = 'Senha redefinida com sucesso!';
+          mensagem.className = 'mt-4 text-center text-green-600 font-semibold';
+          // Opcional: redirecionar para login depois de 3 segundos
+          setTimeout(() => window.location.href = 'login.html', 3000);
+        } else {
+          mensagem.textContent = data.erro || 'Erro ao redefinir senha.';
+          mensagem.className = 'mt-4 text-center text-red-600 font-semibold';
+        }
+      } catch (error) {
+        mensagem.textContent = 'Erro na conexão.';
+        mensagem.className = 'mt-4 text-center text-red-600 font-semibold';
+      }
+    });
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Assinatura - ALMA</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-[#f4f6f8] min-h-screen flex flex-col items-center p-6 text-gray-800">
+
+  <header class="w-full flex justify-center my-6">
+    <img src="logo.png" alt="Logo ALMA" class="h-32 object-contain" />
+  </header>
+
+  <main class="w-full max-w-3xl bg-white shadow-xl rounded-2xl p-10 text-center">
+    <h1 class="text-4xl font-bold text-[#8C4D3F] mb-6">Confirmação de Assinatura</h1>
+
+    <div class="border-t border-gray-200 pt-6 mb-8">
+      <h2 class="text-2xl font-semibold mb-2" id="planoTitulo">Plano Escolhido</h2>
+      <p class="text-xl font-bold text-[#8C4D3F]" id="planoPreco">R$ 19,90/mês</p>
+      <p class="text-gray-600 mt-2" id="planoDescricao">Acesso completo a registros de humor e relatórios</p>
+    </div>
+
+    <button class="bg-[#BF726B] hover:bg-[#8C4D3F] text-white px-10 py-4 rounded-xl text-lg font-semibold shadow-md transition duration-300">
+      Confirmar Assinatura
+    </button>
+  </main>
+
+  <footer class="mt-12 text-gray-500 text-sm text-center">
+    &copy; 2025 ALMA - Todos os direitos reservados.
+  </footer>
+
+  <script>
+    // Simples leitura da query string
+    const params = new URLSearchParams(window.location.search);
+    const plano = params.get('plano');
+
+    const titulo = document.getElementById('planoTitulo');
+    const preco = document.getElementById('planoPreco');
+    const descricao = document.getElementById('planoDescricao');
+
+    if (plano === 'mensal') {
+      titulo.textContent = 'Plano Mensal';
+      preco.textContent = 'R$ 19,90/mês';
+      descricao.textContent = 'Acesso completo a registros de humor e relatórios.';
+    } else if (plano === 'anual') {
+      titulo.textContent = 'Plano Anual';
+      preco.textContent = 'R$ 199,90/ano';
+      descricao.textContent = 'Economize dois meses. Inclui suporte prioritário.';
+    } else if (plano === 'gratis') {
+      titulo.textContent = 'Teste Grátis';
+      preco.textContent = '7 dias gratuitos';
+      descricao.textContent = 'Experimente todos os recursos sem compromisso.';
+    }
+  </script>
+</body>
+</html>

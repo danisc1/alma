@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Login ALMA</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="cores.css" />
+</head>
+<body class="bg-[var(--cor-fundo)] min-h-screen flex items-center justify-center p-4">
+
+  <main class="bg-white rounded-lg shadow-lg max-w-md w-full p-8">
+    <h1 class="text-3xl font-semibold mb-6 text-[var(--cor-escura)] text-center">Login ALMA</h1>
+
+    <form id="loginForm" class="space-y-5">
+      <input
+        type="email"
+        id="email"
+        placeholder="Email"
+        required
+        class="w-full rounded-md border border-[var(--cor-secundaria)] px-4 py-2
+               placeholder-[var(--cor-clara)] focus:outline-none focus:ring-2 focus:ring-[var(--cor-secundaria)]"
+      />
+
+      <input
+        type="password"
+        id="senha"
+        placeholder="Senha"
+        required
+        class="w-full rounded-md border border-[var(--cor-secundaria)] px-4 py-2
+               placeholder-[var(--cor-clara)] focus:outline-none focus:ring-2 focus:ring-[var(--cor-secundaria)]"
+      />
+
+      <button
+        type="submit"
+        class="w-full bg-[var(--cor-escura)] text-white font-semibold py-3 rounded-md
+               hover:bg-[var(--cor-secundaria)] transition-colors duration-300"
+      >
+        Entrar
+      </button>
+ <button type="button" onclick="window.location.href='index.html'"class="mt-6 w-full bg-[var(--cor-secundaria)] text-white font-semibold py-3 rounded-md hover:bg-[var(--cor-escura)] transition-colors duration-300"
+  >Voltar para a Página Inicial</button>
+
+  
+      <!-- Esqueci a senha -->
+      <div class="text-center mt-2">
+        <a href="recuperar-senha.html" class="text-[var(--cor-escura)] hover:text-[var(--cor-secundaria)] text-sm font-medium transition-colors">
+          Esqueci minha senha
+        </a>
+      </div>
+    </form>
+
+ 
+
+    <p id="msgErro" class="mt-4 text-center text-red-600 font-semibold"></p>
+  </main>
+
+  <script>
+    const API_URL = 'http://localhost:3000';
+
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('email').value.trim();
+      const senha = document.getElementById('senha').value.trim();
+
+      try {
+        const res = await fetch(`${API_URL}/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, senha }),
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          document.getElementById('msgErro').textContent = data.erro || 'Erro no login';
+          return;
+        }
+
+        localStorage.setItem('token', data.token);
+        window.location.href = 'dashboard.html';
+      } catch (error) {
+        document.getElementById('msgErro').textContent = 'Erro na conexão';
+      }
+    });
+  </script>
+
+</body>
+</html>
