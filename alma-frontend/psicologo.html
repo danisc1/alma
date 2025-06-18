@@ -39,7 +39,7 @@
         id="listaPacientes"
         class="max-h-64 overflow-auto border border-[var(--cor-secundaria)] rounded-md p-4 space-y-2 text-[var(--cor-escura)] cursor-pointer"
       >
-        <!-- Lista dinâmica -->
+        
       </ul>
     </section>
 
@@ -50,7 +50,7 @@
         id="listaHumorPaciente"
         class="max-h-48 overflow-auto border border-[var(--cor-secundaria)] rounded-md p-3 space-y-2 text-[var(--cor-escura)]"
       >
-        <!-- Histórico dinâmico -->
+        <!-- histórico -->
       </ul>
       <canvas
         id="graficoPaciente"
@@ -77,7 +77,7 @@
 
   document.getElementById('logoutBtn').onclick = logout;
 
-  // Excluir conta
+  // excluir conta
   document.getElementById('excluirContaBtn').onclick = async () => {
     if (!confirm("Tem certeza que deseja excluir sua conta? Essa ação não pode ser desfeita.")) return;
 
@@ -168,7 +168,7 @@
             {
               label: 'Nota do Humor',
               data: notas,
-              borderColor: 'rgb(140 77 63)', // cor escura da paleta
+              borderColor: 'rgb(140 77 63)', 
               backgroundColor: 'rgba(140,77,63,0.15)',
               fill: true,
               tension: 0.3,

@@ -90,8 +90,8 @@
   </main>
 
   <script>
-    // Seu script de cadastro aqui (mantive igual ao seu original)
-    const API_URL = 'http://localhost:3000'; // Ajuste se precisar
+    //  cadastro
+    const API_URL = 'http://localhost:3000'; 
 
     async function cadastro(nome, email, senha, tipo_usuario) {
       try {
@@ -109,12 +109,12 @@
         }
 
         if (!res.ok) {
-          return { sucesso: false, erro: data.erro || 'Erro desconhecido no cadastro' };
+          return { sucesso: false, erro: data.erro || 'Erro no cadastro' };
         }
 
         return { sucesso: true };
       } catch (error) {
-        return { sucesso: false, erro: 'Erro ao conectar com o servidor' };
+        return { sucesso: false, erro: 'Erro ao conectar ' };
       }
     }
 
@@ -133,13 +133,13 @@
       const tipo_usuario = form.tipo_usuario.value;
 
       if (!nome || !email || !senha || !tipo_usuario) {
-        msgErro.textContent = 'Por favor, preencha todos os campos.';
+        msgErro.textContent = 'Preencha todos os campos.';
         return;
       }
 
       const res = await cadastro(nome, email, senha, tipo_usuario);
       if (res.sucesso) {
-        msgSucesso.textContent = 'Cadastro realizado! Agora faça login.';
+        msgSucesso.textContent = 'Cadastro realizado!';
         form.reset();
         setTimeout(() => {
           msgSucesso.textContent = '';

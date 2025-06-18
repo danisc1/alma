@@ -7,23 +7,20 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="cores.css" />
-
 </head>
-<body class="bg-[var(--cor-fundo)] min-h-screen p-6 flex flex-col items-center">
 
+<body class="bg-[var(--cor-fundo)] min-h-screen p-6 flex flex-col items-center">
   <header class="w-full max-w-4xl flex justify-between items-center mb-8 px-4">
     <h1 class="text-[var(--cor-escura)] text-3xl font-semibold">Área do Paciente</h1>
     <div class="space-x-3">
       <button
         id="logoutBtn"
-        class="bg-[var(--cor-secundaria)] text-white px-4 py-2 rounded-md hover:bg-[var(--cor-escura)] transition-colors duration-300"
-      >
+        class="bg-[var(--cor-secundaria)] text-white px-4 py-2 rounded-md hover:bg-[var(--cor-escura)] transition-colors duration-300">
         Sair
       </button>
       <button
         id="excluirContaBtn"
-        class="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 transition-colors duration-300"
-      >
+        class="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 transition-colors duration-300">
         Excluir Conta
       </button>
     </div>
@@ -43,8 +40,7 @@
             max="5"
             required
             class="w-full rounded-md border border-[var(--cor-secundaria)] px-3 py-2 mt-1
-                   placeholder-[var(--cor-clara)] focus:outline-none focus:ring-2 focus:ring-[var(--cor-secundaria)]"
-          />
+                   placeholder-[var(--cor-clara)] focus:outline-none focus:ring-2 focus:ring-[var(--cor-secundaria)]" />
         </label>
         <label class="block">
           Comentário:
@@ -52,14 +48,12 @@
             type="text"
             id="comentario"
             class="w-full rounded-md border border-[var(--cor-secundaria)] px-3 py-2 mt-1
-                   placeholder-[var(--cor-clara)] focus:outline-none focus:ring-2 focus:ring-[var(--cor-secundaria)]"
-          />
+                   placeholder-[var(--cor-clara)] focus:outline-none focus:ring-2 focus:ring-[var(--cor-secundaria)]" />
         </label>
         <button
           type="submit"
           class="bg-[var(--cor-escura)] text-white font-semibold px-6 py-2 rounded-md
-                 hover:bg-[var(--cor-secundaria)] transition-colors duration-300"
-        >
+                 hover:bg-[var(--cor-secundaria)] transition-colors duration-300">
           Registrar
         </button>
       </form>
@@ -70,9 +64,8 @@
       <h2 class="text-[var(--cor-secundaria)] text-2xl font-semibold mb-4">Histórico de Humor</h2>
       <ul
         id="listaHumor"
-        class="max-w-md max-h-48 overflow-auto border border-[var(--cor-secundaria)] rounded-md p-3 space-y-2 text-[var(--cor-escura)]"
-      >
-        <!-- Lista dinâmica -->
+        class="max-w-md max-h-48 overflow-auto border border-[var(--cor-secundaria)] rounded-md p-3 space-y-2 text-[var(--cor-escura)]">
+        <!-- Lista -->
       </ul>
     </section>
 
@@ -82,176 +75,251 @@
         id="graficoHumor"
         width="400"
         height="200"
-        class="max-w-full rounded-md border border-[var(--cor-secundaria)] p-2 bg-white shadow-inner"
-      ></canvas>
+        class="max-w-full rounded-md border border-[var(--cor-secundaria)] p-2 bg-white shadow-inner">
+      </canvas>
+    </section>
+
+    <section>
+      <h2 class="text-[var(--cor-secundaria)] text-2xl font-semibold mb-4">Atualizar Perfil</h2>
+      <div class="flex items-center space-x-4 mb-4">
+        <img id="fotoPerfil" src="" alt="Foto de perfil"
+          class="w-20 h-20 rounded-full border border-[var(--cor-secundaria)] object-cover" />
+        <span id="nomeAtual" class="text-lg font-semibold text-[var(--cor-escura)]"></span>
+      </div>
+      <form id="perfilForm" class="max-w-md space-y-4">
+        <label class="block">
+          Novo Nome:
+          <input type="text" id="novoNome"
+            class="w-full border border-[var(--cor-secundaria)] rounded px-3 py-2 mt-1 focus:outline-none focus:ring-2 focus:ring-[var(--cor-secundaria)]" />
+        </label>
+        <label class="block">
+          Novo Email:
+          <input type="email" id="novoEmail"
+            class="w-full border border-[var(--cor-secundaria)] rounded px-3 py-2 mt-1 focus:outline-none focus:ring-2 focus:ring-[var(--cor-secundaria)]" />
+        </label>
+        <label class="block">
+          URL da Nova Foto:
+          <input type="text" id="novaFoto"
+            class="w-full border border-[var(--cor-secundaria)] rounded px-3 py-2 mt-1 focus:outline-none focus:ring-2 focus:ring-[var(--cor-secundaria)]" />
+        </label>
+        <button type="submit"
+          class="bg-green-700 hover:bg-green-800 text-white px-6 py-2 rounded font-semibold">Atualizar</button>
+      </form>
+      <p id="msgPerfil" class="mt-2 font-semibold"></p>
     </section>
 
   </main>
 
-<script>
-const API_URL = 'http://localhost:3000';
+  <script>
+    const API_URL = 'http://localhost:3000';
+    function pegarToken() {
+      return localStorage.getItem('token');
+    }
 
-function pegarToken() {
-  return localStorage.getItem('token');
-}
+    function logout() {
+      localStorage.removeItem('token');
+      window.location.href = 'login.html';
+    }
 
-function logout() {
-  localStorage.removeItem('token');
-  window.location.href = 'login.html';
-}
+    document.getElementById('logoutBtn').onclick = logout;
 
-document.getElementById('logoutBtn').onclick = logout;
+    let chartHumor = null;
 
-let chartHumor = null;
+    async function carregarHumor() {
+      const token = pegarToken();
+      const res = await fetch(`${API_URL}/humor`, {
+        headers: { Authorization: 'Bearer ' + token }
+      });
 
-async function carregarHumor() {
-  const token = pegarToken();
-  const res = await fetch(`${API_URL}/humor`, {
-    headers: { Authorization: 'Bearer ' + token }
-  });
+      if (!res.ok) {
+        document.getElementById('listaHumor').textContent = 'Erro ao carregar histórico.';
+        return;
+      }
 
-  if (!res.ok) {
-    document.getElementById('listaHumor').textContent = 'Erro ao carregar histórico.';
-    return;
-  }
+      const resposta = await res.json();
+      const humores = resposta.registros || [];
 
-  const resposta = await res.json();
-  const humores = resposta.registros || [];
+      if (!Array.isArray(humores)) {
+        console.error("Resposta inválida do backend:", resposta);
+        document.getElementById('listaHumor').textContent = 'Erro ao carregar histórico.';
+        return;
+      }
 
-  if (!Array.isArray(humores)) {
-    console.error("Resposta inválida do backend:", resposta);
-    document.getElementById('listaHumor').textContent = 'Erro ao carregar histórico.';
-    return;
-  }
+      const ul = document.getElementById('listaHumor');
+      ul.innerHTML = '';
 
-  const ul = document.getElementById('listaHumor');
-  ul.innerHTML = '';
+      const labels = [];
+      const dataNotas = [];
 
-  const labels = [];
-  const dataNotas = [];
+      humores.forEach(h => {
+        const dataFormatada = new Date(h.data_registro).toLocaleDateString();
+        labels.push(dataFormatada);
+        dataNotas.push(h.nota);
 
-  humores.forEach(h => {
-    const dataFormatada = new Date(h.data_registro).toLocaleDateString();
-    labels.push(dataFormatada);
-    dataNotas.push(h.nota);
+        const li = document.createElement('li');
+        li.textContent = `${dataFormatada}: Nota ${h.nota} - ${h.comentario || ''}`;
+        ul.appendChild(li);
+      });
 
-    const li = document.createElement('li');
-    li.textContent = `${dataFormatada}: Nota ${h.nota} - ${h.comentario || ''}`;
-    ul.appendChild(li);
-  });
-
-  if (chartHumor) {
-    chartHumor.data.labels = labels;
-    chartHumor.data.datasets[0].data = dataNotas;
-    chartHumor.update();
-  } else {
-    const ctx = document.getElementById('graficoHumor').getContext('2d');
-    chartHumor = new Chart(ctx, {
-      type: 'line',
-      data: {
-        labels,
-        datasets: [{
-          label: 'Nota do Humor',
-          data: dataNotas,
-          borderColor: 'rgb(140 77 63)', // cor escura da paleta
-          backgroundColor: 'rgba(140,77,63,0.15)',
-          fill: true,
-          tension: 0.3,
-          pointRadius: 5
-        }]
-      },
-      options: {
-        scales: {
-          y: {
-            min: 1,
-            max: 5,
-            title: { display: true, text: 'Nota do Humor' }
+      if (chartHumor) {
+        chartHumor.data.labels = labels;
+        chartHumor.data.datasets[0].data = dataNotas;
+        chartHumor.update();
+      } else {
+        const ctx = document.getElementById('graficoHumor').getContext('2d');
+        chartHumor = new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels,
+            datasets: [{
+              label: 'Nota do Humor',
+              data: dataNotas,
+              borderColor: 'rgb(140 77 63)',
+              backgroundColor: 'rgba(140,77,63,0.15)',
+              fill: true,
+              tension: 0.3,
+              pointRadius: 5
+            }]
+          },
+          options: {
+            scales: {
+              y: {
+                min: 1,
+                max: 5,
+                title: { display: true, text: 'Nota do Humor' }
+              }
+            }
           }
+        });
+      }
+    }
+
+    async function carregarNomeUsuario() {
+      const token = pegarToken();
+      if (!token) return;
+
+      try {
+        const res = await fetch(`${API_URL}/perfil`, {
+          headers: { Authorization: 'Bearer ' + token }
+        });
+        if (!res.ok) throw new Error('Erro ao buscar perfil');
+
+        const usuario = await res.json();
+        const h1 = document.querySelector('h1');
+        h1.textContent = `Área do Paciente - ${usuario.nome}`;
+
+        const nomeAtual = document.getElementById('nomeAtual');
+        const fotoPerfil = document.getElementById('fotoPerfil');
+
+        if (nomeAtual) nomeAtual.textContent = usuario.nome;
+        if (fotoPerfil && usuario.foto_url) {
+          fotoPerfil.src = usuario.foto_url;
         }
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    document.getElementById('humorForm').addEventListener('submit', async e => {
+      e.preventDefault();
+      const nota = Number(document.getElementById('nota').value);
+      const comentario = document.getElementById('comentario').value;
+
+      const token = pegarToken();
+      const res = await fetch(`${API_URL}/humor`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: 'Bearer ' + token
+        },
+        body: JSON.stringify({ nota, comentario })
+      });
+
+      const data = await res.json();
+      const msg = document.getElementById('msgHumor');
+
+      if (res.ok) {
+        msg.style.color = 'green';
+        msg.textContent = 'Humor registrado com sucesso!';
+        e.target.reset();
+        carregarHumor();
+      } else {
+        msg.style.color = 'red';
+        msg.textContent = data.erro || 'Erro ao registrar humor';
       }
     });
-  }
-}
 
-// Carregar nome do paciente e mostrar no <h1>
-async function carregarNomeUsuario() {
-  const token = pegarToken();
-  if (!token) return;
+    document.getElementById('perfilForm').addEventListener('submit', async e => {
+      e.preventDefault();
 
-  try {
-    const res = await fetch(`${API_URL}/perfil`, {
-      headers: { Authorization: 'Bearer ' + token }
-    });
-    if (!res.ok) throw new Error('Erro ao buscar perfil');
+      const nome = document.getElementById('novoNome').value.trim();
+      const email = document.getElementById('novoEmail').value.trim();
+      const foto_url = document.getElementById('novaFoto').value.trim();
 
-    const usuario = await res.json();
-    const h1 = document.querySelector('h1');
-    h1.textContent = `Área do Paciente - ${usuario.nome}`;
-  } catch (err) {
-    console.error(err);
-  }
-}
+      if (!nome && !email && !foto_url) {
+        document.getElementById('msgPerfil').style.color = 'red';
+        document.getElementById('msgPerfil').textContent = 'Preencha pelo menos um campo.';
+        return;
+      }
 
-document.getElementById('humorForm').addEventListener('submit', async e => {
-  e.preventDefault();
-  const nota = Number(document.getElementById('nota').value);
-  const comentario = document.getElementById('comentario').value;
+      const token = pegarToken();
 
-  const token = pegarToken();
-  const res = await fetch(`${API_URL}/humor`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: 'Bearer ' + token
-    },
-    body: JSON.stringify({ nota, comentario })
-  });
+      try {
+        const res = await fetch(`${API_URL}/perfil`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: 'Bearer ' + token
+          },
+          body: JSON.stringify({ nome, email, foto_url })
+        });
 
-  const data = await res.json();
-  const msg = document.getElementById('msgHumor');
+        const data = await res.json();
+        const msg = document.getElementById('msgPerfil');
 
-  if (res.ok) {
-    msg.style.color = 'green';
-    msg.textContent = 'Humor registrado com sucesso!';
-    e.target.reset();
-    carregarHumor(); // atualiza o gráfico e a lista
-  } else {
-    msg.style.color = 'red';
-    msg.textContent = data.erro || 'Erro ao registrar humor';
-  }
-});
-
-// Excluir conta
-document.getElementById('excluirContaBtn').onclick = async () => {
-  if (!confirm("Tem certeza que deseja excluir sua conta? Essa ação não pode ser desfeita.")) return;
-
-  const token = pegarToken();
-
-  try {
-    const res = await fetch(`${API_URL}/usuarios/excluir`, {
-      method: 'DELETE',
-      headers: { Authorization: 'Bearer ' + token }
+        if (res.ok) {
+          msg.style.color = 'green';
+          msg.textContent = 'Perfil atualizado com sucesso!';
+          carregarNomeUsuario();
+        } else {
+          msg.style.color = 'red';
+          msg.textContent = data.erro || 'Erro ao atualizar perfil';
+        }
+      } catch (err) {
+        document.getElementById('msgPerfil').style.color = 'red';
+        document.getElementById('msgPerfil').textContent = 'Erro ao conectar com o servidor';
+      }
     });
 
-    const data = await res.json();
+    document.getElementById('excluirContaBtn').onclick = async () => {
+      if (!confirm("Tem certeza que deseja excluir sua conta? Essa ação não pode ser desfeita.")) return;
 
-    if (res.ok) {
-      alert('Conta excluída com sucesso!');
-      localStorage.removeItem('token');
-      window.location.href = 'index.html';
-    } else {
-      alert(data.erro || 'Erro ao excluir conta');
-    }
-  } catch (error) {
-    alert('Erro ao conectar com o servidor');
-  }
-};
+      const token = pegarToken();
 
-window.onload = () => {
-  carregarNomeUsuario();
-  carregarHumor();
-};
-</script>
+      try {
+        const res = await fetch(`${API_URL}/usuarios/excluir`, {
+          method: 'DELETE',
+          headers: { Authorization: 'Bearer ' + token }
+        });
 
+        const data = await res.json();
+
+        if (res.ok) {
+          alert('Conta excluída com sucesso!');
+          localStorage.removeItem('token');
+          window.location.href = 'index.html';
+        } else {
+          alert(data.erro || 'Erro ao excluir conta');
+        }
+      } catch (error) {
+        alert('Erro ao conectar com o servidor');
+      }
+    };
+
+    window.onload = () => {
+      carregarNomeUsuario();
+      carregarHumor();
+    };
+  </script>
 </body>
 </html>

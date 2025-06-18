@@ -14,9 +14,9 @@
 
     <form id="redefinirForm" class="space-y-5">
       <input
-        type="text"
-        id="token"
-        placeholder="Digite o token recebido"
+        type="email"
+        id="email"
+        placeholder="Digite seu email"
         required
         class="w-full rounded-md border border-[var(--cor-secundaria)] px-4 py-2
                placeholder-[var(--cor-clara)] focus:outline-none focus:ring-2 focus:ring-[var(--cor-secundaria)]"
@@ -55,15 +55,15 @@
 
     document.getElementById('redefinirForm').addEventListener('submit', async (e) => {
       e.preventDefault();
-      const token = document.getElementById('token').value.trim();
+      const email = document.getElementById('email').value.trim();
       const novaSenha = document.getElementById('novaSenha').value.trim();
       const mensagem = document.getElementById('mensagem');
 
       try {
-        const res = await fetch(`${API_URL}/redefinir-senha`, {
+       const res = await fetch(`${API_URL}/redefinir-senha`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ token, novaSenha }),
+          body: JSON.stringify({ email, novaSenha }),
         });
 
         const data = await res.json();
@@ -71,7 +71,6 @@
         if (res.ok) {
           mensagem.textContent = 'Senha redefinida com sucesso!';
           mensagem.className = 'mt-4 text-center text-green-600 font-semibold';
-          // Opcional: redirecionar para login depois de 3 segundos
           setTimeout(() => window.location.href = 'login.html', 3000);
         } else {
           mensagem.textContent = data.erro || 'Erro ao redefinir senha.';
