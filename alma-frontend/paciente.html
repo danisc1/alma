@@ -67,6 +67,10 @@
         class="max-w-md max-h-48 overflow-auto border border-[var(--cor-secundaria)] rounded-md p-3 space-y-2 text-[var(--cor-escura)]">
         <!-- Lista -->
       </ul>
+      <div class="flex justify-center gap-4 mt-4">
+        <button id="btnAnterior" class="bg-gray-300 px-4 py-2 rounded disabled:opacity-50" disabled>Anterior</button>
+        <button id="btnProximo" class="bg-gray-300 px-4 py-2 rounded disabled:opacity-50">Próximo</button>
+      </div>
     </section>
 
     <section>
@@ -125,9 +129,14 @@
 
     let chartHumor = null;
 
+    let offset = 0;
+    const limit = 5;
+    let totalRegistros = 0;
+
     async function carregarHumor() {
       const token = pegarToken();
-      const res = await fetch(`${API_URL}/humor`, {
+
+      const res = await fetch(`${API_URL}/humor?limit=${limit}&offset=${offset}`, {
         headers: { Authorization: 'Bearer ' + token }
       });
 
@@ -137,29 +146,49 @@
       }
 
       const resposta = await res.json();
+      totalRegistros = resposta.total || 0;
       const humores = resposta.registros || [];
-
-      if (!Array.isArray(humores)) {
-        console.error("Resposta inválida do backend:", resposta);
-        document.getElementById('listaHumor').textContent = 'Erro ao carregar histórico.';
-        return;
-      }
 
       const ul = document.getElementById('listaHumor');
       ul.innerHTML = '';
 
-      const labels = [];
-      const dataNotas = [];
+      if (humores.length === 0) {
+        ul.textContent = 'Nenhum registro encontrado.';
+      } else {
+        humores.forEach(h => {
+          const dataFormatada = new Date(h.data_registro).toLocaleDateString();
+          const li = document.createElement('li');
+          li.textContent = `${dataFormatada}: Nota ${h.nota} - ${h.comentario || ''}`;
+          ul.appendChild(li);
+        });
+      }
 
-      humores.forEach(h => {
-        const dataFormatada = new Date(h.data_registro).toLocaleDateString();
-        labels.push(dataFormatada);
-        dataNotas.push(h.nota);
+      atualizarBotoesPaginacao();
+      atualizarGrafico(humores);
+    }
 
-        const li = document.createElement('li');
-        li.textContent = `${dataFormatada}: Nota ${h.nota} - ${h.comentario || ''}`;
-        ul.appendChild(li);
-      });
+    function atualizarBotoesPaginacao() {
+      document.getElementById('btnAnterior').disabled = offset === 0;
+      document.getElementById('btnProximo').disabled = offset + limit >= totalRegistros;
+    }
+
+    document.getElementById('btnAnterior').onclick = () => {
+      if (offset >= limit) {
+        offset -= limit;
+        carregarHumor();
+      }
+    };
+
+    document.getElementById('btnProximo').onclick = () => {
+      if (offset + limit < totalRegistros) {
+        offset += limit;
+        carregarHumor();
+      }
+    };
+
+    function atualizarGrafico(humores) {
+      const labels = humores.map(h => new Date(h.data_registro).toLocaleDateString());
+      const dataNotas = humores.map(h => h.nota);
 
       if (chartHumor) {
         chartHumor.data.labels = labels;
@@ -242,6 +271,7 @@
         msg.style.color = 'green';
         msg.textContent = 'Humor registrado com sucesso!';
         e.target.reset();
+        offset = 0; // volta pra primeira página após registrar novo humor
         carregarHumor();
       } else {
         msg.style.color = 'red';
