@@ -5,41 +5,61 @@
   <title>Registrar Humor - ALMA</title>
 </head>
 <body>
+  <!-- título da página -->
   <h1>Registrar Humor</h1>
+  <!-- botão para sair (logout) -->
   <button onclick="logout()">Logout</button>
+
+  <!-- formulário para registrar o humor -->
   <form id="formHumor">
-    <label>Nota (1 a 5):
+    <label>nota (1 a 5):
       <input type="number" id="nota" min="1" max="5" required />
     </label><br />
-    <label>Comentário:
+    <label>comentário:
       <textarea id="comentario"></textarea>
     </label><br />
-    <button type="submit">Registrar</button>
+    <button type="submit">registrar</button>
   </form>
+
+  <!-- área para mostrar mensagem de erro -->
   <p id="msgErro" style="color:red;"></p>
+  <!-- área para mostrar mensagem de sucesso -->
   <p id="msgSucesso" style="color:rgb(0, 128, 0);"></p>
 
+  <!-- script externo onde ficam funções como logout e registrarHumor -->
   <script src="script.js"></script>
+
   <script>
+    // função para proteger a página (verificar se o usuário está logado)
     protegerPagina();
 
+    // pega elementos do formulário e mensagens
     const form = document.getElementById('formHumor');
     const msgErro = document.getElementById('msgErro');
     const msgSucesso = document.getElementById('msgSucesso');
 
+    // evento quando o formulário for enviado
     form.addEventListener('submit', async (e) => {
-      e.preventDefault();
+      e.preventDefault(); // evita que a página recarregue
+
+      // limpa mensagens antigas
       msgErro.textContent = '';
       msgSucesso.textContent = '';
 
+      // pega o valor da nota e converte para número
       const nota = Number(form.nota.value);
+      // pega o texto do comentário e remove espaços extras
       const comentario = form.comentario.value.trim();
 
+      // chama a função registrarHumor (assíncrona) que envia os dados para o backend
       const res = await registrarHumor(nota, comentario);
+
+      // se cadastro deu certo, mostra mensagem de sucesso e reseta o formulário
       if (res.sucesso) {
         msgSucesso.textContent = 'Humor registrado com sucesso!';
         form.reset();
       } else {
+        // se deu erro, mostra mensagem de erro
         msgErro.textContent = res.erro;
       }
     });

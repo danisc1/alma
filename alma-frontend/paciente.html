@@ -4,192 +4,160 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Paciente ALMA</title>
+
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="cores.css" />
 </head>
 
 <body class="bg-[var(--cor-fundo)] min-h-screen p-6 flex flex-col items-center">
+  <!-- cabeçalho da página -->
   <header class="w-full max-w-4xl flex justify-between items-center mb-8 px-4">
     <h1 class="text-[var(--cor-escura)] text-3xl font-semibold">Área do Paciente</h1>
     <div class="space-x-3">
-      <button
-        id="logoutBtn"
-        class="bg-[var(--cor-secundaria)] text-white px-4 py-2 rounded-md hover:bg-[var(--cor-escura)] transition-colors duration-300">
-        Sair
-      </button>
-      <button
-        id="excluirContaBtn"
-        class="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 transition-colors duration-300">
-        Excluir Conta
-      </button>
+      <!-- botão para logout -->
+      <button id="logoutBtn" class="bg-[var(--cor-secundaria)] text-white px-4 py-2 rounded-md hover:bg-[var(--cor-escura)] transition-colors duration-300">Sair</button>
+      <!-- botão para exclusão da conta -->
+      <button id="excluirContaBtn" class="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 transition-colors duration-300">Excluir Conta</button>
     </div>
   </header>
 
+  <!-- conteúdo principal da página -->
   <main class="w-full max-w-4xl bg-white rounded-lg shadow-lg p-6 space-y-10">
-
+    <!-- seção para registrar humor -->
     <section>
       <h2 class="text-[var(--cor-secundaria)] text-2xl font-semibold mb-4">Registrar Humor</h2>
       <form id="humorForm" class="space-y-4 max-w-md">
         <label class="block">
           Nota (1 a 5):
-          <input
-            type="number"
-            id="nota"
-            min="1"
-            max="5"
-            required
-            class="w-full rounded-md border border-[var(--cor-secundaria)] px-3 py-2 mt-1
-                   placeholder-[var(--cor-clara)] focus:outline-none focus:ring-2 focus:ring-[var(--cor-secundaria)]" />
+          <!-- input para nota do humor, obrigatório -->
+          <input type="number" id="nota" min="1" max="5" required class="w-full rounded-md border border-[var(--cor-secundaria)] px-3 py-2 mt-1" />
         </label>
         <label class="block">
           Comentário:
-          <input
-            type="text"
-            id="comentario"
-            class="w-full rounded-md border border-[var(--cor-secundaria)] px-3 py-2 mt-1
-                   placeholder-[var(--cor-clara)] focus:outline-none focus:ring-2 focus:ring-[var(--cor-secundaria)]" />
+          <!-- input para comentário opcional -->
+          <input type="text" id="comentario" class="w-full rounded-md border border-[var(--cor-secundaria)] px-3 py-2 mt-1" />
         </label>
-        <button
-          type="submit"
-          class="bg-[var(--cor-escura)] text-white font-semibold px-6 py-2 rounded-md
-                 hover:bg-[var(--cor-secundaria)] transition-colors duration-300">
-          Registrar
-        </button>
+        <!-- botão para enviar o formulário -->
+        <button type="submit" class="bg-[var(--cor-escura)] text-white font-semibold px-6 py-2 rounded-md hover:bg-[var(--cor-secundaria)] transition-colors duration-300">Registrar</button>
       </form>
+
       <p id="msgHumor" class="mt-3 font-semibold"></p>
     </section>
 
+    <!-- seção para exibir histórico de humor -->
     <section>
       <h2 class="text-[var(--cor-secundaria)] text-2xl font-semibold mb-4">Histórico de Humor</h2>
-      <ul
-        id="listaHumor"
-        class="max-w-md max-h-48 overflow-auto border border-[var(--cor-secundaria)] rounded-md p-3 space-y-2 text-[var(--cor-escura)]">
-        <!-- Lista -->
+      <ul id="listaHumor" class="max-w-md max-h-48 overflow-auto border border-[var(--cor-secundaria)] rounded-md p-3 space-y-2 text-[var(--cor-escura)]">
       </ul>
-      <div class="flex justify-center gap-4 mt-4">
-        <button id="btnAnterior" class="bg-gray-300 px-4 py-2 rounded disabled:opacity-50" disabled>Anterior</button>
-        <button id="btnProximo" class="bg-gray-300 px-4 py-2 rounded disabled:opacity-50">Próximo</button>
+      <!-- botões para paginação do histórico -->
+      <div class="mt-4 flex justify-between max-w-md">
+        <button id="btnAnterior" class="bg-[var(--cor-secundaria)] text-white px-4 py-2 rounded disabled:opacity-50">Anterior</button>
+        <button id="btnProximo" class="bg-[var(--cor-secundaria)] text-white px-4 py-2 rounded disabled:opacity-50">Próximo</button>
       </div>
     </section>
 
+    <!-- seção com o gráfico de evolução do humor -->
     <section>
       <h2 class="text-[var(--cor-secundaria)] text-2xl font-semibold mb-4">Gráfico de Evolução do Humor</h2>
-      <canvas
-        id="graficoHumor"
-        width="400"
-        height="200"
-        class="max-w-full rounded-md border border-[var(--cor-secundaria)] p-2 bg-white shadow-inner">
-      </canvas>
+      <canvas id="graficoHumor" width="400" height="200" class="max-w-full rounded-md border border-[var(--cor-secundaria)] p-2 bg-white shadow-inner"></canvas>
     </section>
 
+    <!-- seção para atualizar dados do perfil -->
     <section>
       <h2 class="text-[var(--cor-secundaria)] text-2xl font-semibold mb-4">Atualizar Perfil</h2>
       <div class="flex items-center space-x-4 mb-4">
-        <img id="fotoPerfil" src="" alt="Foto de perfil"
-          class="w-20 h-20 rounded-full border border-[var(--cor-secundaria)] object-cover" />
+        <!-- foto atual do perfil -->
+        <img id="fotoPerfil" src="" alt="Foto de perfil" class="w-20 h-20 rounded-full border border-[var(--cor-secundaria)] object-cover" />
+        <!-- nome atual do usuário -->
         <span id="nomeAtual" class="text-lg font-semibold text-[var(--cor-escura)]"></span>
       </div>
       <form id="perfilForm" class="max-w-md space-y-4">
         <label class="block">
           Novo Nome:
-          <input type="text" id="novoNome"
-            class="w-full border border-[var(--cor-secundaria)] rounded px-3 py-2 mt-1 focus:outline-none focus:ring-2 focus:ring-[var(--cor-secundaria)]" />
+          <!-- input para novo nome -->
+          <input type="text" id="novoNome" class="w-full border border-[var(--cor-secundaria)] rounded px-3 py-2 mt-1" />
         </label>
         <label class="block">
           Novo Email:
-          <input type="email" id="novoEmail"
-            class="w-full border border-[var(--cor-secundaria)] rounded px-3 py-2 mt-1 focus:outline-none focus:ring-2 focus:ring-[var(--cor-secundaria)]" />
+          <!-- input para novo email -->
+          <input type="email" id="novoEmail" class="w-full border border-[var(--cor-secundaria)] rounded px-3 py-2 mt-1" />
         </label>
         <label class="block">
           URL da Nova Foto:
-          <input type="text" id="novaFoto"
-            class="w-full border border-[var(--cor-secundaria)] rounded px-3 py-2 mt-1 focus:outline-none focus:ring-2 focus:ring-[var(--cor-secundaria)]" />
+          <!-- input para URL da nova foto -->
+          <input type="text" id="novaFoto" class="w-full border border-[var(--cor-secundaria)] rounded px-3 py-2 mt-1" />
         </label>
-        <button type="submit"
-          class="bg-green-700 hover:bg-green-800 text-white px-6 py-2 rounded font-semibold">Atualizar</button>
+        <button type="submit" class="bg-green-700 hover:bg-green-800 text-white px-6 py-2 rounded font-semibold">Atualizar</button>
       </form>
       <p id="msgPerfil" class="mt-2 font-semibold"></p>
     </section>
-
   </main>
 
   <script>
+    // url base da api backend
     const API_URL = 'http://localhost:3000';
+
+    //pegar token salvo no localstorage
     function pegarToken() {
       return localStorage.getItem('token');
     }
 
+    //logout
     function logout() {
       localStorage.removeItem('token');
       window.location.href = 'login.html';
     }
-
+    // botão sair
     document.getElementById('logoutBtn').onclick = logout;
 
+    // variáveis para controlar o gráfico e paginação
     let chartHumor = null;
+    let paginaAtual = 0;
+    const limitePorPagina = 5;
 
-    let offset = 0;
-    const limit = 5;
-    let totalRegistros = 0;
-
+    // função para carregar os registros de humor paginados
     async function carregarHumor() {
       const token = pegarToken();
-
-      const res = await fetch(`${API_URL}/humor?limit=${limit}&offset=${offset}`, {
+      // busca dados do backend com token no header
+      const res = await fetch(`${API_URL}/humor?limit=${limitePorPagina}&offset=${paginaAtual * limitePorPagina}`, {
         headers: { Authorization: 'Bearer ' + token }
       });
 
+      const ul = document.getElementById('listaHumor');
+      const anteriorBtn = document.getElementById('btnAnterior');
+      const proximoBtn = document.getElementById('btnProximo');
+
+      //mostra mensagem e desabilita botões
       if (!res.ok) {
-        document.getElementById('listaHumor').textContent = 'Erro ao carregar histórico.';
+        ul.textContent = 'Erro ao carregar histórico.';
+        anteriorBtn.disabled = true;
+        proximoBtn.disabled = true;
         return;
       }
 
+      // obtém resposta em json
       const resposta = await res.json();
-      totalRegistros = resposta.total || 0;
       const humores = resposta.registros || [];
+      const total = resposta.total || 0;
 
-      const ul = document.getElementById('listaHumor');
+      // limpa lista antes de popular
       ul.innerHTML = '';
+      const labels = [];
+      const dataNotas = [];
 
-      if (humores.length === 0) {
-        ul.textContent = 'Nenhum registro encontrado.';
-      } else {
-        humores.forEach(h => {
-          const dataFormatada = new Date(h.data_registro).toLocaleDateString();
-          const li = document.createElement('li');
-          li.textContent = `${dataFormatada}: Nota ${h.nota} - ${h.comentario || ''}`;
-          ul.appendChild(li);
-        });
-      }
+      // percorre cada registro de humor para criar itens na lista e preparar dados do gráfico
+      humores.forEach(h => {
+        const dataFormatada = new Date(h.data_registro).toLocaleDateString();
+        labels.push(dataFormatada);
+        dataNotas.push(h.nota);
+        // cria item da lista com nota e comentário
+        const li = document.createElement('li');
+        li.textContent = `${dataFormatada}: Nota ${h.nota} - ${h.comentario || ''}`;
+        ul.appendChild(li);
+      });
 
-      atualizarBotoesPaginacao();
-      atualizarGrafico(humores);
-    }
-
-    function atualizarBotoesPaginacao() {
-      document.getElementById('btnAnterior').disabled = offset === 0;
-      document.getElementById('btnProximo').disabled = offset + limit >= totalRegistros;
-    }
-
-    document.getElementById('btnAnterior').onclick = () => {
-      if (offset >= limit) {
-        offset -= limit;
-        carregarHumor();
-      }
-    };
-
-    document.getElementById('btnProximo').onclick = () => {
-      if (offset + limit < totalRegistros) {
-        offset += limit;
-        carregarHumor();
-      }
-    };
-
-    function atualizarGrafico(humores) {
-      const labels = humores.map(h => new Date(h.data_registro).toLocaleDateString());
-      const dataNotas = humores.map(h => h.nota);
-
+      // atualiza ou cria gráfico de linha com dados novos
       if (chartHumor) {
         chartHumor.data.labels = labels;
         chartHumor.data.datasets[0].data = dataNotas;
@@ -221,40 +189,39 @@
           }
         });
       }
+
+      // controla habilitação dos botões de paginação
+      anteriorBtn.disabled = paginaAtual === 0;
+      proximoBtn.disabled = (paginaAtual + 1) * limitePorPagina >= total;
     }
 
+    //carregar dados do perfil do usuário e atualizar na página
     async function carregarNomeUsuario() {
       const token = pegarToken();
       if (!token) return;
-
       try {
         const res = await fetch(`${API_URL}/perfil`, {
           headers: { Authorization: 'Bearer ' + token }
         });
         if (!res.ok) throw new Error('Erro ao buscar perfil');
-
         const usuario = await res.json();
-        const h1 = document.querySelector('h1');
-        h1.textContent = `Área do Paciente - ${usuario.nome}`;
-
-        const nomeAtual = document.getElementById('nomeAtual');
-        const fotoPerfil = document.getElementById('fotoPerfil');
-
-        if (nomeAtual) nomeAtual.textContent = usuario.nome;
-        if (fotoPerfil && usuario.foto_url) {
-          fotoPerfil.src = usuario.foto_url;
-        }
+        // atualiza título da página e nome e foto na seção de perfil
+        document.querySelector('h1').textContent = `Área do Paciente - ${usuario.nome}`;
+        document.getElementById('nomeAtual').textContent = usuario.nome;
+        if (usuario.foto_url) document.getElementById('fotoPerfil').src = usuario.foto_url;
       } catch (err) {
         console.error(err);
       }
     }
 
+    //formulário para registrar humor
     document.getElementById('humorForm').addEventListener('submit', async e => {
       e.preventDefault();
       const nota = Number(document.getElementById('nota').value);
       const comentario = document.getElementById('comentario').value;
-
       const token = pegarToken();
+
+      // envia dados para backend
       const res = await fetch(`${API_URL}/humor`, {
         method: 'POST',
         headers: {
@@ -267,25 +234,26 @@
       const data = await res.json();
       const msg = document.getElementById('msgHumor');
 
+      // mostra mensagem de sucesso ou erro
       if (res.ok) {
         msg.style.color = 'green';
         msg.textContent = 'Humor registrado com sucesso!';
-        e.target.reset();
-        offset = 0; // volta pra primeira página após registrar novo humor
-        carregarHumor();
+        e.target.reset(); // limpa formulário
+        carregarHumor();  // recarrega lista e gráfico
       } else {
         msg.style.color = 'red';
         msg.textContent = data.erro || 'Erro ao registrar humor';
       }
     });
 
+    //formulário para atualizar perfil
     document.getElementById('perfilForm').addEventListener('submit', async e => {
       e.preventDefault();
-
       const nome = document.getElementById('novoNome').value.trim();
       const email = document.getElementById('novoEmail').value.trim();
       const foto_url = document.getElementById('novaFoto').value.trim();
 
+      // verifica se pelo menos um campo foi preenchido
       if (!nome && !email && !foto_url) {
         document.getElementById('msgPerfil').style.color = 'red';
         document.getElementById('msgPerfil').textContent = 'Preencha pelo menos um campo.';
@@ -293,8 +261,8 @@
       }
 
       const token = pegarToken();
-
       try {
+        // envia dados atualizados para backend
         const res = await fetch(`${API_URL}/perfil`, {
           method: 'PATCH',
           headers: {
@@ -307,10 +275,11 @@
         const data = await res.json();
         const msg = document.getElementById('msgPerfil');
 
+        // mostra mensagem de sucesso ou erro
         if (res.ok) {
           msg.style.color = 'green';
           msg.textContent = 'Perfil atualizado com sucesso!';
-          carregarNomeUsuario();
+          carregarNomeUsuario(); // atualiza nome e foto na página
         } else {
           msg.style.color = 'red';
           msg.textContent = data.erro || 'Erro ao atualizar perfil';
@@ -321,19 +290,20 @@
       }
     });
 
+    //botão para excluir conta
     document.getElementById('excluirContaBtn').onclick = async () => {
       if (!confirm("Tem certeza que deseja excluir sua conta? Essa ação não pode ser desfeita.")) return;
 
       const token = pegarToken();
-
       try {
+        // envia requisição de exclusão para backend
         const res = await fetch(`${API_URL}/usuarios/excluir`, {
           method: 'DELETE',
           headers: { Authorization: 'Bearer ' + token }
         });
 
         const data = await res.json();
-
+        // redireciona para a página inicial
         if (res.ok) {
           alert('Conta excluída com sucesso!');
           localStorage.removeItem('token');
@@ -346,6 +316,20 @@
       }
     };
 
+    // botão anterior para paginação
+    document.getElementById('btnAnterior').onclick = () => {
+      if (paginaAtual > 0) {
+        paginaAtual--;
+        carregarHumor();
+      }
+    };
+    //  botão próximo para paginação
+    document.getElementById('btnProximo').onclick = () => {
+      paginaAtual++;
+      carregarHumor();
+    };
+
+    //quando a página carregar, carrega nome do usuário e histórico de humor
     window.onload = () => {
       carregarNomeUsuario();
       carregarHumor();

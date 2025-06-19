@@ -3,15 +3,16 @@
 <head>
   <meta charset="UTF-8" />
   <title>Cadastro - ALMA</title>
+  <!-- tailwind para estilo -->
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="cores.css" />
-
 </head>
 <body class="bg-[var(--cor-fundo)] min-h-screen flex items-center justify-center p-4">
 
   <main class="bg-white rounded-lg shadow-lg max-w-md w-full p-8">
     <h1 class="text-3xl font-semibold mb-6 text-[var(--cor-escura)] text-center">Cadastro ALMA</h1>
 
+    <!-- formulário de cadastro -->
     <form id="formCadastro" class="space-y-5">
       <label class="block">
         <span class="text-[var(--cor-escura)] font-medium">Nome</span>
@@ -67,6 +68,7 @@
         </select>
       </label>
 
+      <!-- botão enviar -->
       <button
         type="submit"
         class="w-full bg-[var(--cor-escura)] text-white font-semibold py-3 rounded-md
@@ -74,10 +76,11 @@
       >
         Cadastrar
       </button>
-       <button type="button" onclick="window.location.href='index.html' "class="mt-6 w-full bg-[var(--cor-secundaria)] text-white font-semibold py-3 rounded-md hover:bg-[var(--cor-escura)] transition-colors duration-300"
-  >Voltar para a Página Inicial</button>
-
-  
+      <!-- botão voltar para página inicial -->
+      <button type="button" onclick="window.location.href='index.html'" 
+        class="mt-6 w-full bg-[var(--cor-secundaria)] text-white font-semibold py-3 rounded-md hover:bg-[var(--cor-escura)] transition-colors duration-300">
+        Voltar para a Página Inicial
+      </button>
     </form>
 
     <p class="mt-6 text-center text-[var(--cor-escura)]">
@@ -85,14 +88,16 @@
       <a href="login.html" class="text-[var(--cor-secundaria)] hover:underline font-semibold">Login</a>
     </p>
 
+    <!-- mensagens de erro e sucesso -->
     <p id="msgErro" class="mt-4 text-center text-red-600 font-semibold"></p>
     <p id="msgSucesso" class="mt-4 text-center text-green-600 font-semibold"></p>
   </main>
 
   <script>
-    //  cadastro
-    const API_URL = 'http://localhost:3000'; 
+    // url do backend
+    const API_URL = 'http://localhost:3000';
 
+    // função para cadastrar usuário
     async function cadastro(nome, email, senha, tipo_usuario) {
       try {
         const res = await fetch(`${API_URL}/usuarios`, {
@@ -114,33 +119,42 @@
 
         return { sucesso: true };
       } catch (error) {
-        return { sucesso: false, erro: 'Erro ao conectar ' };
+        return { sucesso: false, erro: 'Erro ao conectar' };
       }
     }
 
+    // referência ao formulário e às mensagens
     const form = document.getElementById('formCadastro');
     const msgErro = document.getElementById('msgErro');
     const msgSucesso = document.getElementById('msgSucesso');
 
+    // quando o formulário for enviado
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
+      // limpa mensagens antigas
       msgErro.textContent = '';
       msgSucesso.textContent = '';
 
+      // pega valores dos campos
       const nome = form.nome.value.trim();
       const email = form.email.value.trim();
       const senha = form.senha.value.trim();
       const tipo_usuario = form.tipo_usuario.value;
 
+      // validação simples: todos campos obrigatórios
       if (!nome || !email || !senha || !tipo_usuario) {
         msgErro.textContent = 'Preencha todos os campos.';
         return;
       }
 
+      // chama a função de cadastro
       const res = await cadastro(nome, email, senha, tipo_usuario);
+
+      // mostra mensagem dependendo do resultado
       if (res.sucesso) {
         msgSucesso.textContent = 'Cadastro realizado!';
         form.reset();
+        // limpa mensagem depois de 5 segundos
         setTimeout(() => {
           msgSucesso.textContent = '';
         }, 5000);

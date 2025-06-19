@@ -55,34 +55,42 @@
     <p id="msgErro" class="mt-4 text-center text-red-600 font-semibold"></p>
   </main>
 
-  <script>
-    const API_URL = 'http://localhost:3000';
+ <script>
+  const API_URL = 'http://localhost:3000'; // endereço da api backend
 
-    document.getElementById('loginForm').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const email = document.getElementById('email').value.trim();
-      const senha = document.getElementById('senha').value.trim();
+  // adiciona evento ao formulário de login (quando for enviado)
+  document.getElementById('loginForm').addEventListener('submit', async (e) => {
+    e.preventDefault(); // evita recarregar a página
 
-      try {
-       const res = await fetch(`${API_URL}/usuarios/login`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, senha }),
-        });
+    // pega valores digitados no formulário e remove espaços extras
+    const email = document.getElementById('email').value.trim();
+    const senha = document.getElementById('senha').value.trim();
 
-        const data = await res.json();
-        if (!res.ok) {
-          document.getElementById('msgErro').textContent = data.erro || 'Erro no login';
-          return;
-        }
+    try {
+      // faz requisição para login na api, enviando email e senha no corpo
+      const res = await fetch(`${API_URL}/login`, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ email, senha }),
+      });
 
-        localStorage.setItem('token', data.token);
-        window.location.href = 'dashboard.html';
-      } catch (error) {
-        document.getElementById('msgErro').textContent = 'Erro na conexão';
+      // espera a resposta json
+      const data = await res.json();
+
+      // se deu erro no login, mostra mensagem e sai da função
+      if (!res.ok) {
+        document.getElementById('msgErro').textContent = data.erro || 'erro no login';
+        return;
       }
-    });
-  </script>
 
-</body>
-</html>
+      // se login deu certo, salva o token no localStorage para usar depois
+      localStorage.setItem('token', data.token);
+
+      // redireciona para a página do dashboard
+      window.location.href = 'dashboard.html';
+    } catch (error) {
+      // se deu erro de conexão, mostra mensagem
+      document.getElementById('msgErro').textContent = 'erro na conexão';
+    }
+  });
+</script>

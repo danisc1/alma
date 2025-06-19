@@ -1,14 +1,18 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
-const Usuario = require('./Usuario');
 
 const Humor = sequelize.define('Humor', {
+  usuario_id: {
+    type: DataTypes.INTEGER,
+    allowNull: false
+  },
   nota: {
     type: DataTypes.INTEGER,
     allowNull: false
   },
   comentario: {
-    type: DataTypes.TEXT
+    type: DataTypes.TEXT,
+    allowNull: true
   },
   data_registro: {
     type: DataTypes.DATE,
@@ -18,8 +22,5 @@ const Humor = sequelize.define('Humor', {
   tableName: 'humor',
   timestamps: false
 });
-
-Humor.belongsTo(Usuario, { foreignKey: 'usuario_id' });
-Usuario.hasMany(Humor, { foreignKey: 'usuario_id' });
 
 module.exports = Humor;

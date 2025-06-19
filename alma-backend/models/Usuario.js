@@ -8,19 +8,20 @@ const Usuario = sequelize.define('Usuario', {
   },
   email: {
     type: DataTypes.STRING,
-    unique: true,
-    allowNull: false
+    allowNull: false,
+    unique: true
   },
   senha_hash: {
     type: DataTypes.STRING,
     allowNull: false
   },
   tipo_usuario: {
-    type: DataTypes.ENUM('paciente', 'psicologo'),
+    type: DataTypes.STRING,
     allowNull: false
   },
   foto_url: {
-    type: DataTypes.TEXT
+    type: DataTypes.STRING,
+    allowNull: true
   }
 }, {
   tableName: 'usuarios',

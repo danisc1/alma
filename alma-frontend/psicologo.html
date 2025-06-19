@@ -2,217 +2,192 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Psicólogo ALMA</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="cores.css" />
-
- 
-  </style>
 </head>
 <body class="bg-[var(--cor-fundo)] min-h-screen p-6 flex flex-col items-center">
-
-  <header class="w-full max-w-5xl flex justify-between items-center mb-8 px-4">
+  <header class="w-full max-w-4xl flex justify-between items-center mb-8 px-4">
     <h1 class="text-[var(--cor-escura)] text-3xl font-semibold">Área do Psicólogo</h1>
     <div class="space-x-3">
-      <button
-        id="logoutBtn"
-        class="bg-[var(--cor-secundaria)] text-white px-4 py-2 rounded-md hover:bg-[var(--cor-escura)] transition-colors duration-300"
-      >
-        Sair
-      </button>
-      <button
-        id="excluirContaBtn"
-        class="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 transition-colors duration-300"
-      >
-        Excluir Conta
-      </button>
+      <button id="logoutBtn" class="bg-[var(--cor-secundaria)] text-white px-4 py-2 rounded-md hover:bg-[var(--cor-escura)] transition-colors duration-300">Sair</button>
+      <button id="excluirContaBtn" class="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 transition-colors duration-300">Excluir Conta</button>
     </div>
   </header>
 
-  <main class="w-full max-w-5xl bg-white rounded-lg shadow-lg p-6 space-y-10">
-
+  <main class="w-full max-w-4xl bg-white rounded-lg shadow-lg p-6 space-y-10">
     <section>
       <h2 class="text-[var(--cor-secundaria)] text-2xl font-semibold mb-4">Lista de Pacientes</h2>
-      <ul
-        id="listaPacientes"
-        class="max-h-64 overflow-auto border border-[var(--cor-secundaria)] rounded-md p-4 space-y-2 text-[var(--cor-escura)] cursor-pointer"
-      >
-        
-      </ul>
+      <ul id="listaPacientes" class="cursor-pointer space-y-2"></ul> <!-- lista de pacientes clicáveis -->
     </section>
 
     <section>
-      <h2 class="text-[var(--cor-secundaria)] text-2xl font-semibold mb-4">Histórico e Gráficos do Paciente</h2>
-      <h3 id="nomePaciente" class="text-[var(--cor-escura)] text-xl font-semibold mb-4">Nenhum paciente selecionado</h3>
-      <ul
-        id="listaHumorPaciente"
-        class="max-h-48 overflow-auto border border-[var(--cor-secundaria)] rounded-md p-3 space-y-2 text-[var(--cor-escura)]"
-      >
-      
-
-        <!-- histórico -->
-      </ul>
-      <canvas
-        id="graficoPaciente"
-        width="600"
-        height="300"
-        class="mt-6 w-full max-w-full rounded-md border border-[var(--cor-secundaria)] p-2 bg-white shadow-inner"
-      ></canvas>
+      <h2 class="text-[var(--cor-secundaria)] text-2xl font-semibold mb-4">Histórico de Humor do Paciente</h2>
+      <h3 id="nomePaciente" class="text-lg font-semibold text-[var(--cor-escura)]">Nenhum paciente selecionado</h3>
+      <ul id="listaHumorPaciente" class="max-h-48 overflow-auto border border-[var(--cor-secundaria)] rounded-md p-3 space-y-2 text-[var(--cor-escura)]"></ul> <!-- histórico de humor do paciente -->
+      <div class="flex justify-between mt-4">
+        <button id="btnAnterior" class="bg-[var(--cor-secundaria)] text-white px-4 py-2 rounded disabled:opacity-50">Anterior</button>
+        <button id="btnProximo" class="bg-[var(--cor-secundaria)] text-white px-4 py-2 rounded disabled:opacity-50">Próximo</button>
+      </div>
     </section>
 
+    <section>
+      <h2 class="text-[var(--cor-secundaria)] text-2xl font-semibold mb-4">Gráfico de Evolução do Humor</h2>
+      <canvas id="graficoHumorPaciente" width="400" height="200" class="max-w-full rounded-md border border-[var(--cor-secundaria)] p-2 bg-white shadow-inner"></canvas> <!-- gráfico do humor -->
+    </section>
   </main>
 
-<script>
-  const API_URL = 'http://localhost:3000';
-  let chartPaciente = null;
+  <script>
+    const API_URL = 'http://localhost:3000'; // url da api backend
+    let pacienteSelecionado = null; // paciente que está selecionado para ver histórico
+    let pagina = 0; // página atual da paginação
+    const limite = 5; // quantos registros por página
+    let totalRegistros = 0; // total de registros disponíveis
+    let chartPaciente = null; // gráfico do paciente
 
-  function pegarToken() {
-    return localStorage.getItem('token');
-  }
+    // pega o token do local storage
+    const pegarToken = () => localStorage.getItem('token');
 
-  function logout() {
-    localStorage.removeItem('token');
-    window.location.href = 'login.html';
-  }
+    // função para logout - remove token e redireciona para login
+    const logout = () => {
+      localStorage.removeItem('token');
+      window.location.href = 'login.html';
+    };
+    document.getElementById('logoutBtn').onclick = logout; // atribui evento botão sair
 
-  document.getElementById('logoutBtn').onclick = logout;
-
-  // excluir conta
-  document.getElementById('excluirContaBtn').onclick = async () => {
-    if (!confirm("Tem certeza que deseja excluir sua conta? Essa ação não pode ser desfeita.")) return;
-
-    const token = pegarToken();
-
-    try {
-      const res = await fetch(`${API_URL}/usuarios/excluir`, {
-        method: 'DELETE',
-        headers: { Authorization: 'Bearer ' + token }
-      });
-
-      const data = await res.json();
-
-      if (res.ok) {
-        alert('Conta excluída com sucesso!');
-        localStorage.removeItem('token');
-        window.location.href = 'index.html';
-      } else {
-        alert(data.erro || 'Erro ao excluir conta');
-      }
-    } catch (error) {
-      alert('Erro ao conectar com o servidor');
-    }
-  };
-
-  async function carregarPacientes() {
-    const token = pegarToken();
-    const res = await fetch(`${API_URL}/pacientes`, {
-      headers: { Authorization: 'Bearer ' + token }
-    });
-    if (!res.ok) {
-      document.getElementById('listaPacientes').textContent = 'Erro ao carregar pacientes.';
-      return;
-    }
-    const pacientes = await res.json();
-    const ul = document.getElementById('listaPacientes');
-    ul.innerHTML = '';
-
-    pacientes.forEach(p => {
-      const li = document.createElement('li');
-      li.textContent = `${p.nome} (${p.email})`;
-      li.dataset.id = p.id;
-      li.className = "hover:bg-[var(--cor-clara)] rounded-md px-2 py-1";
-      li.onclick = () => carregarHistoricoPaciente(p.id, p.nome);
-      ul.appendChild(li);
-    });
-  }
-
-  async function carregarHistoricoPaciente(pacienteId, nome) {
-    const token = pegarToken();
-    const res = await fetch(`${API_URL}/humor/paciente/${pacienteId}`, {
-      headers: { Authorization: 'Bearer ' + token }
-    });
-    if (!res.ok) {
-      alert('Erro ao carregar histórico do paciente');
-      return;
-    }
-    const dados = await res.json();
-    document.getElementById('nomePaciente').textContent = nome;
-
-    const ul = document.getElementById('listaHumorPaciente');
-    ul.innerHTML = '';
-
-    const labels = [];
-    const notas = [];
-
-    dados.forEach(item => {
-      const dataFormatada = new Date(item.data_registro).toLocaleDateString();
-      labels.push(dataFormatada);
-      notas.push(item.nota);
-
-      const li = document.createElement('li');
-      li.textContent = `${dataFormatada}: Nota ${item.nota} - Comentário: ${item.comentario || 'Sem comentário'}`;
-      ul.appendChild(li);
-    });
-
-    if (chartPaciente) {
-      chartPaciente.data.labels = labels;
-      chartPaciente.data.datasets[0].data = notas;
-      chartPaciente.update();
-    } else {
-      const ctx = document.getElementById('graficoPaciente').getContext('2d');
-      chartPaciente = new Chart(ctx, {
-        type: 'line',
-        data: {
-          labels,
-          datasets: [
-            {
-              label: 'Nota do Humor',
-              data: notas,
-              borderColor: 'rgb(140 77 63)', 
-              backgroundColor: 'rgba(140,77,63,0.15)',
-              fill: true,
-              tension: 0.3,
-              pointRadius: 5
-            }
-          ]
-        },
-        options: {
-          scales: {
-            y: {
-              min: 1,
-              max: 5,
-              title: { display: true, text: 'Nota' }
-            }
-          }
+    // função para excluir conta do psicólogo
+    document.getElementById('excluirContaBtn').onclick = async () => {
+      if (!confirm("Tem certeza que deseja excluir sua conta?")) return;
+      try {
+        const res = await fetch(`${API_URL}/usuarios/excluir`, {
+          method: 'DELETE',
+          headers: { Authorization: 'Bearer ' + pegarToken() }
+        });
+        if (res.ok) {
+          alert('Conta excluída com sucesso');
+          logout();
+        } else {
+          const erro = await res.json();
+          alert(erro.erro || 'Erro ao excluir conta');
         }
-      });
+      } catch {
+        alert('Erro ao conectar com o servidor');
+      }
+    };
+
+    // carrega lista de pacientes do backend
+    async function carregarPacientes() {
+      try {
+        const res = await fetch(`${API_URL}/pacientes`, {
+          headers: { Authorization: 'Bearer ' + pegarToken() }
+        });
+        const pacientes = await res.json();
+        const ul = document.getElementById('listaPacientes');
+        ul.innerHTML = ''; // limpa lista antes de adicionar
+        pacientes.forEach(p => {
+          const li = document.createElement('li');
+          li.className = 'cursor-pointer hover:underline';
+          li.textContent = `${p.nome} (${p.email})`;
+          li.onclick = () => {
+            pacienteSelecionado = p; // define paciente selecionado
+            pagina = 0; // reseta pagina para 0
+            document.getElementById('nomePaciente').textContent = p.nome; // mostra nome do paciente
+            carregarHistoricoHumor(); // carrega histórico do paciente
+          };
+          ul.appendChild(li);
+        });
+      } catch (error) {
+        console.error('erro ao carregar pacientes:', error);
+      }
     }
-  }
 
-  async function carregarNomeUsuario() {
-    const token = pegarToken();
-    if (!token) return;
+    // carrega histórico de humor do paciente selecionado, com paginação
+    async function carregarHistoricoHumor() {
+      if (!pacienteSelecionado) return;
 
-    try {
-      const res = await fetch(`${API_URL}/perfil`, {
-        headers: { Authorization: 'Bearer ' + token }
-      });
-      if (!res.ok) throw new Error('Erro ao buscar perfil');
+      try {
+        const res = await fetch(`${API_URL}/humor/paciente/${pacienteSelecionado.id}?limit=${limite}&offset=${pagina * limite}`, {
+          headers: { Authorization: 'Bearer ' + pegarToken() }
+        });
+        const resposta = await res.json();
+        const lista = document.getElementById('listaHumorPaciente');
+        lista.innerHTML = ''; // limpa lista antes de adicionar
+        totalRegistros = resposta.total || 0; // atualiza total de registros
 
-      const usuario = await res.json();
-      const h1 = document.querySelector('h1');
-      h1.textContent = `Área do Psicólogo - ${usuario.nome}`;
-    } catch (err) {
-      console.error(err);
+        const labels = [];
+        const notas = [];
+
+        (resposta.registros || resposta).forEach(h => {
+          const data = new Date(h.data_registro).toLocaleDateString();
+          labels.push(data);
+          notas.push(h.nota);
+
+          const li = document.createElement('li');
+          li.textContent = `${data}: Nota ${h.nota} - ${h.comentario || ''}`;
+          lista.appendChild(li);
+        });
+
+        // atualiza ou cria gráfico
+        if (chartPaciente) {
+          chartPaciente.data.labels = labels;
+          chartPaciente.data.datasets[0].data = notas;
+          chartPaciente.update();
+        } else {
+          const ctx = document.getElementById('graficoHumorPaciente').getContext('2d');
+          chartPaciente = new Chart(ctx, {
+            type: 'line',
+            data: {
+              labels,
+              datasets: [{
+                label: 'nota do humor',
+                data: notas,
+                borderColor: 'rgb(140 77 63)',
+                backgroundColor: 'rgba(140,77,63,0.15)',
+                fill: true,
+                tension: 0.3,
+                pointRadius: 5
+              }]
+            },
+            options: {
+              scales: {
+                y: {
+                  min: 1,
+                  max: 5,
+                  title: { display: true, text: 'nota do humor' }
+                }
+              }
+            }
+          });
+        }
+
+        // ativa ou desativa botões anterior e próximo da paginação
+        document.getElementById('btnAnterior').disabled = pagina === 0;
+        document.getElementById('btnProximo').disabled = (pagina + 1) * limite >= totalRegistros;
+
+      } catch (error) {
+        console.error('erro ao carregar humor do paciente:', error);
+      }
     }
-  }
 
-  window.onload = () => {
-    carregarNomeUsuario();
-    carregarPacientes();
-  };
-</script>
+    // evento para botão anterior
+    document.getElementById('btnAnterior').onclick = () => {
+      if (pagina > 0) {
+        pagina--;
+        carregarHistoricoHumor();
+      }
+    };
+
+    // evento para botão próximo
+    document.getElementById('btnProximo').onclick = () => {
+      if ((pagina + 1) * limite < totalRegistros) {
+        pagina++;
+        carregarHistoricoHumor();
+      }
+    };
+
+    // carrega lista de pacientes ao abrir a página
+    window.onload = carregarPacientes;
+  </script>
 </body>
 </html>
